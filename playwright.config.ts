@@ -6,6 +6,13 @@ const config: PlaywrightTestConfig = {
     ignoreHTTPSErrors: true,
     trace: 'on-first-retry',
     video: 'on-first-retry',
+    navigationTimeout: 0,
   },
+  // testMatch: 'demoqa.com/sortable.spec.ts',
+  // reporter: [
+  //   ['list'],
+  //   ['dot'],
+  //   ['experimental-allure-playwright'],
+  // ]
 };
 export default config;

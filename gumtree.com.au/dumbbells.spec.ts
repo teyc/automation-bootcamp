@@ -1,6 +1,9 @@
 import { test, expect, Page } from '@playwright/test';
 
-test('test', async ({ page }) => {
+test('get five dumbbells', async ({ page }, testInfo ) => {
+
+  // slow test - actually takes about 2 minutes
+  testInfo.setTimeout(0)
 
   // Go to https://www.gumtree.com.au/
   await page.goto('https://www.gumtree.com.au/', { waitUntil: "domcontentloaded" });
@@ -36,21 +39,29 @@ test('test', async ({ page }) => {
 
   // Take the number of ads or 5 which ever lower
   let numberOfItems = Math.min(count, 5);
-  console.log(`Count = ${count}. Number of items: ${numberOfItems}`)
+  console.log(`Count = ${count}. Number of items to fetch: ${numberOfItems}`)
 
   for (let index = 0; index < numberOfItems; index++) {
-    let link = await page.$(`div.user-ad-collection-new-design a >> nth=${index}`)
-    let href = await link.getAttribute('href');
+
+    // Take the URL of the link and see if it is a Gumtree ad (starts with '/') or external ad like EBay
+    let href = await page.$eval(`div.user-ad-collection-new-design a >> nth=${index}`, node => node.getAttribute('href'))
 
     if (!href || !href.startsWith('/')) {
+      // External ad, try the next item
       console.log(`Skipping ${href}`)
       continue;
+    }
+    else {
+      // Gumtree ad
+      console.log(`Found ${href}`)
     }
 
     await Promise.all([
       page.waitForNavigation({ waitUntil: 'domcontentloaded' }),
       page.click(`div.user-ad-collection-new-design a >> nth=${index}`)
     ])
+
+    await page.screenshot({ path: `test-results/gumtree-${index}.png`, fullPage: true })
 
     await page.goBack()
   }

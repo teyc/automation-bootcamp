@@ -1,8 +1,10 @@
 {
   "scripts": {
+    "clean": "powershell.exe remove-item allure-results/*",
     "test": "playwright test"
   },
   "devDependencies": {
-    "@playwright/test": "^1.14.1"
+    "@playwright/test": "^1.14.1",
+    "experimental-allure-playwright": "^0.0.3"
   }
 }
