@@ -3,7 +3,7 @@ import { test, expect, Page } from '@playwright/test';
 test('test', async ({ page }) => {
 
   // Go to https://www.gumtree.com.au/
-  await page.goto('https://www.gumtree.com.au/');
+  await page.goto('https://www.gumtree.com.au/', { waitUntil: "domcontentloaded" });
 
   // Click text=I Understand
   await page.click('text=I Understand');
@@ -12,7 +12,8 @@ test('test', async ({ page }) => {
   await page.click('[placeholder="Australia"]');
 
   // Fill [placeholder="Australia"]
-  await page.fill('[placeholder="Australia"]', 'brisbane regio');
+  await page.focus('[placeholder="Australia"]');
+  await page.keyboard.type('brisbane region');
 
   // Click text=Brisbane Region, QLD
   await page.click('text=Brisbane Region, QLD');
@@ -21,19 +22,36 @@ test('test', async ({ page }) => {
   await page.click('[placeholder="I\'m looking for..."]');
 
   // Fill [placeholder="I'm looking for..."]
-  await page.fill('[placeholder="I\'m looking for..."]', 'dumbbells');
+  await page.focus('[placeholder="I\'m looking for..."]');
+  await page.keyboard.type('dumbbells');
 
   // Click a:has-text("dumbbells in Gym & Fitness")
   await Promise.all([
-    page.waitForNavigation(/*{ url: 'https://www.gumtree.com.au/s-gym-fitness/brisbane/dumbbells/k0c18565l3005721' }*/),
+    page.waitForNavigation({ waitUntil: 'domcontentloaded'}),
     page.click('a:has-text("dumbbells in Gym & Fitness")')
   ]);
 
-  // Click text=Adjustable Bench, Dumbbells & Weights
-  await Promise.all([
-    page.waitForNavigation(/*{ url: 'https://www.gumtree.com.au/s-ad/chandler/gym-fitness/adjustable-bench-dumbbells-weights/1280682856' }*/),
-    page.click('text=Adjustable Bench, Dumbbells & Weights')
-  ]);
+  // How many ads are there
+  let count = (await page.$$('div.user-ad-collection-new-design a')).length
 
+  // Take the number of ads or 5 which ever lower
+  let numberOfItems = Math.min(count, 5);
+  console.log(`Count = ${count}. Number of items: ${numberOfItems}`)
 
+  for (let index = 0; index < numberOfItems; index++) {
+    let link = await page.$(`div.user-ad-collection-new-design a >> nth=${index}`)
+    let href = await link.getAttribute('href');
+
+    if (!href || !href.startsWith('/')) {
+      console.log(`Skipping ${href}`)
+      continue;
+    }
+
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'domcontentloaded' }),
+      page.click(`div.user-ad-collection-new-design a >> nth=${index}`)
+    ])
+
+    await page.goBack()
+  }
 });

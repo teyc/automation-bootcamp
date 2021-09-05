@@ -26,4 +26,25 @@ tools you will need (they are free, you only need to download and install them).
 
 ## Day 1 - Running demo
 
-1.
+1. `npm run test`
+
+2. Show detailed logs
+
+```
+$env:DEBUG="pw:api"
+npm run test
+```
+
+3. Trace
+
+```
+npx playwright show-trace test-results\trace.zip
+
+```
+
+## Day 2 - Advanced
+
+```
+let links = await page.$$('div.a')
+let href = await links[0].getAttribute('href')
+```
